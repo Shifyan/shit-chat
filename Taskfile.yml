@@ -1,0 +1,22 @@
+version: "3"
+
+tasks:
+  install:
+    desc: Install semua dependency frontend dan backend
+    cmds:
+      - cd frontend && bun install
+      - cd backend && go mod download
+
+  dev:
+    desc: Jalankan mode development backend dan frontend bersamaan
+    deps: [dev:backend, dev:frontend]
+
+  dev:backend:
+    dir: backend
+    cmds:
+      - air
+
+  dev:frontend:
+    dir: frontend
+    cmds:
+      - bun run dev

@@ -1,0 +1,284 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-surface: var(--surface);
+  --color-surface-dim: var(--surface-dim);
+  --color-surface-bright: var(--surface-bright);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-inverse-surface: var(--inverse-surface);
+  --color-inverse-on-surface: var(--inverse-on-surface);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+  --color-surface-tint: var(--surface-tint);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-inverse-primary: var(--inverse-primary);
+  --color-secondary: var(--secondary);
+  --color-on-secondary: var(--on-secondary);
+  --color-secondary-container: var(--secondary-container);
+  --color-on-secondary-container: var(--on-secondary-container);
+  --color-tertiary: var(--tertiary);
+  --color-on-tertiary: var(--on-tertiary);
+  --color-tertiary-container: var(--tertiary-container);
+  --color-on-tertiary-container: var(--on-tertiary-container);
+  --color-error: var(--error);
+  --color-on-error: var(--on-error);
+  --color-error-container: var(--error-container);
+  --color-on-error-container: var(--on-error-container);
+  --color-primary-fixed: var(--primary-fixed);
+  --color-primary-fixed-dim: var(--primary-fixed-dim);
+  --color-on-primary-fixed: var(--on-primary-fixed);
+  --color-on-primary-fixed-variant: var(--on-primary-fixed-variant);
+  --color-secondary-fixed: var(--secondary-fixed);
+  --color-secondary-fixed-dim: var(--secondary-fixed-dim);
+  --color-on-secondary-fixed: var(--on-secondary-fixed);
+  --color-on-secondary-fixed-variant: var(--on-secondary-fixed-variant);
+  --color-tertiary-fixed: var(--tertiary-fixed);
+  --color-tertiary-fixed-dim: var(--tertiary-fixed-dim);
+  --color-on-tertiary-fixed: var(--on-tertiary-fixed);
+  --color-on-tertiary-fixed-variant: var(--on-tertiary-fixed-variant);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-on-background: var(--on-background);
+  --color-surface-variant: var(--surface-variant);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-sidebar: var(--sidebar-background);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--primary);
+  --color-sidebar-primary-foreground: var(--on-primary);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--ring);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-full: var(--radius-full);
+  --radius-default: var(--radius-default);
+
+  --spacing-un: 4px;
+  --spacing-xs: var(--spacing-xs);
+  --spacing-sm: var(--spacing-sm);
+  --spacing-md: var(--spacing-md);
+  --spacing-lg: var(--spacing-lg);
+  --spacing-xl: var(--spacing-xl);
+
+  --font-size-display: 40px;
+  --font-size-headline-lg: 24px;
+  --font-size-headline-lg-mobile: 20px;
+  --font-size-body-lg: 16px;
+  --font-size-body-md: 14px;
+  --font-size-label-md: 12px;
+  --font-size-label-sm: 11px;
+
+  --tracking-display: -0.02em;
+  --tracking-headline-lg: -0.01em;
+  --tracking-headline-lg-mobile: -0.01em;
+  --tracking-label-md: 0.02em;
+  --tracking-label-sm: 0.04em;
+
+  --leading-display: 48px;
+  --leading-headline-lg: 32px;
+  --leading-headline-lg-mobile: 28px;
+  --leading-body-lg: 24px;
+  --leading-body-md: 20px;
+  --leading-label-md: 16px;
+  --leading-label-sm: 14px;
+}
+
+:root {
+  /* Design system colors from design.md YAML */
+  --surface: #f9f9ff;
+  --surface-dim: #d3daea;
+  --surface-bright: #f9f9ff;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f0f3ff;
+  --surface-container: #e7eefe;
+  --surface-container-high: #e2e8f8;
+  --surface-container-highest: #dce2f3;
+  --on-surface: #151c27;
+  --on-surface-variant: #4c4546;
+  --inverse-surface: #2a313d;
+  --inverse-on-surface: #ebf1ff;
+  --outline: #7e7576;
+  --outline-variant: #cfc4c5;
+  --surface-tint: #5e5e5e;
+  --primary: #000000;
+  --on-primary: #ffffff;
+  --primary-container: #1b1b1b;
+  --on-primary-container: #848484;
+  --inverse-primary: #c6c6c6;
+  --secondary: #5d5f5f;
+  --on-secondary: #ffffff;
+  --secondary-container: #dfe0e0;
+  --on-secondary-container: #616363;
+  --tertiary: #000000;
+  --on-tertiary: #ffffff;
+  --tertiary-container: #1b1b1b;
+  --on-tertiary-container: #848484;
+  --error: #ba1a1a;
+  --on-error: #ffffff;
+  --error-container: #ffdad6;
+  --on-error-container: #93000a;
+  --primary-fixed: #e2e2e2;
+  --primary-fixed-dim: #c6c6c6;
+  --on-primary-fixed: #1b1b1b;
+  --on-primary-fixed-variant: #474747;
+  --secondary-fixed: #e2e2e2;
+  --secondary-fixed-dim: #c6c6c7;
+  --on-secondary-fixed: #1a1c1c;
+  --on-secondary-fixed-variant: #454747;
+  --tertiary-fixed: #e2e2e2;
+  --tertiary-fixed-dim: #c6c6c6;
+  --on-tertiary-fixed: #1b1b1b;
+  --on-tertiary-fixed-variant: #474747;
+  --background: #f9f9ff;
+  --on-background: #151c27;
+  --surface-variant: #dce2f3;
+
+  /* Standard shadcn variables mappings */
+  --card: #ffffff;
+  --card-foreground: #151c27;
+  --popover: #ffffff;
+  --popover-foreground: #151c27;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --accent: #f9fafb;
+  --accent-foreground: #000000;
+  --destructive: #ba1a1a;
+  --destructive-foreground: #ffffff;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #000000;
+
+  --sidebar-background: #f3f4f6;
+  --sidebar-foreground: #151c27;
+  --sidebar-border: #e5e7eb;
+  --sidebar-accent: #f9fafb;
+  --sidebar-accent-foreground: #000000;
+
+  /* Design system spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 40px;
+
+  /* Design system roundness */
+  --radius-sm: 0.125rem;
+  --radius-default: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
+  --radius: 0.25rem;
+}
+
+.dark {
+  --surface: #121212;
+  --surface-dim: #1d1d1d;
+  --surface-bright: #242424;
+  --surface-container-lowest: #0d0d0d;
+  --surface-container-low: #151515;
+  --surface-container: #1b1b1b;
+  --surface-container-high: #222222;
+  --surface-container-highest: #2d2d2d;
+  --on-surface: #ffffff;
+  --on-surface-variant: #c0c0c0;
+  --inverse-surface: #e3e3e3;
+  --inverse-on-surface: #121212;
+  --outline: #8c8c8c;
+  --outline-variant: #444444;
+  --surface-tint: #cccccc;
+  --primary: #ffffff;
+  --on-primary: #000000;
+  --primary-container: #1b1b1b;
+  --on-primary-container: #848484;
+  --inverse-primary: #c6c6c6;
+  --secondary: #a3a3a3;
+  --on-secondary: #000000;
+  --secondary-container: #262626;
+  --on-secondary-container: #a3a3a3;
+  --tertiary: #ffffff;
+  --on-tertiary: #000000;
+  --tertiary-container: #1b1b1b;
+  --on-tertiary-container: #848484;
+  --error: #ffb4ab;
+  --on-error: #690005;
+  --error-container: #93000a;
+  --on-error-container: #ffdad6;
+  --background: #000000;
+  --on-background: #ffffff;
+  --surface-variant: #262626;
+
+  /* Standard shadcn variables mappings */
+  --card: #121212;
+  --card-foreground: #ffffff;
+  --popover: #121212;
+  --popover-foreground: #ffffff;
+  --muted: #1b1b1b;
+  --muted-foreground: #848484;
+  --accent: #1c1c1c;
+  --accent-foreground: #ffffff;
+  --border: #2d2d2d;
+  --input: #2d2d2d;
+  --ring: #ffffff;
+
+  --sidebar-background: #121212;
+  --sidebar-foreground: #ffffff;
+  --sidebar-border: #2d2d2d;
+  --sidebar-accent: #1c1c1c;
+  --sidebar-accent-foreground: #ffffff;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+  input,
+  textarea,
+  select {
+    @apply border border-border rounded-default bg-background px-3 py-2 text-sm outline-none transition-colors duration-150;
+  }
+  input:focus,
+  textarea:focus,
+  select:focus {
+    @apply border-ring ring-0;
+  }
+}
