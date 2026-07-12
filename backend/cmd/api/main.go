@@ -1,31 +1,39 @@
 package main
 
 import (
-	"net/http"
+	"backend/internal/delivery/http"
+	"backend/internal/repository"
+	"backend/internal/usecase"
+	"backend/pkg/database"
+	"log"
+
 	"github.com/gin-gonic/gin"
 )
 
-type bodyRequest struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
-}
+
 
 func main() {
-	router := gin.Default()
-	router.GET("/", func(c *gin.Context) {
-		if c.Request.Method == http.MethodGet {
-			c.String(http.StatusOK, "Hello World")
-		} else {
-			c.String(http.StatusMethodNotAllowed, "Method not allowed")
-		}
-	})
-	router.POST("/", func(c *gin.Context) {
-		var body bodyRequest
-		if err := c.BindJSON(&body); err != nil {
-			c.String(http.StatusBadRequest, "Invalid request bodyiii")
-			return
-		}
-		c.String(http.StatusOK, body.Username + " " + body.Password)
-	})
-	router.Run()
+r := gin.Default()
+dbConfig := database.Config{
+	Host: "127.0.0.1",
+	Port: "5432",
+	User: "postgres",
+	Password: "root",
+	DBName: "shit_chat",
+	SSLMode: "disable",
+}
+
+db, err := database.InitPostgres(dbConfig)
+if err != nil {
+	log.Fatal("Failed to connect to database:", err)
+}
+defer db.Close()
+
+userRepo := repository.NewUserRepository(db)
+authService := usecase.NewAuthService(userRepo)
+authCtrl := http.NewAuthController(authService)
+
+http.MapRoutes(r, authCtrl)
+
+r.Run(":8080")
 }
