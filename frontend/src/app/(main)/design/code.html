@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ChatApp Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+        
+        body {
+            font-family: 'Geist', sans-serif;
+            background-color: #ffffff;
+            color: #151c27;
+            overflow: hidden;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        /* Custom Scrollbar for minimalist feel */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #E5E7EB;
+            border-radius: 2px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #cfc4c5;
+        }
+
+        /* Active chat indicator */
+        .chat-active-indicator {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 100%;
+            background-color: #000000;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#474747",
+                        "primary": "#000000",
+                        "tertiary-container": "#1b1b1b",
+                        "secondary": "#5d5f5f",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#e2e2e2",
+                        "primary-fixed-dim": "#c6c6c6",
+                        "on-primary-fixed": "#1b1b1b",
+                        "surface-bright": "#f9f9ff",
+                        "secondary-fixed": "#e2e2e2",
+                        "on-surface-variant": "#4c4546",
+                        "background": "#f9f9ff",
+                        "primary-fixed": "#e2e2e2",
+                        "surface-container-low": "#f0f3ff",
+                        "outline": "#7e7576",
+                        "secondary-container": "#dfe0e0",
+                        "on-surface": "#151c27",
+                        "surface-container-highest": "#dce2f3",
+                        "surface-tint": "#5e5e5e",
+                        "surface-variant": "#dce2f3",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#848484",
+                        "tertiary": "#000000",
+                        "inverse-primary": "#c6c6c6",
+                        "on-tertiary-fixed-variant": "#474747",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed": "#1a1c1c",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "surface": "#f9f9ff",
+                        "inverse-on-surface": "#ebf1ff",
+                        "secondary-fixed-dim": "#c6c6c7",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#c6c6c6",
+                        "on-tertiary-fixed": "#1b1b1b",
+                        "on-background": "#151c27",
+                        "inverse-surface": "#2a313d",
+                        "on-primary-container": "#848484",
+                        "on-secondary-fixed-variant": "#454747",
+                        "surface-dim": "#d3daea",
+                        "primary-container": "#1b1b1b",
+                        "surface-container": "#e7eefe",
+                        "on-secondary-container": "#616363",
+                        "on-error-container": "#93000a",
+                        "outline-variant": "#cfc4c5",
+                        "surface-container-high": "#e2e8f8",
+                        "on-tertiary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "container-max": "1200px",
+                        "md": "16px",
+                        "gutter": "16px",
+                        "lg": "24px",
+                        "xs": "4px",
+                        "sm": "8px",
+                        "xl": "40px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Geist"],
+                        "body-lg": ["Geist"],
+                        "label-md": ["Geist"],
+                        "display": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "label-sm": ["Geist"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "display": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface-container-lowest selection:bg-primary selection:text-white">
+<div class="flex h-screen overflow-hidden">
+<!-- SideNavBar Shared Component Shell -->
+<aside class="flex flex-col fixed left-0 top-0 h-full w-72 bg-surface-container-lowest border-r border-outline-variant z-50">
+<div class="p-lg">
+<div class="text-headline-lg font-headline-lg font-bold text-primary mb-sm">Messages</div>
+<div class="text-label-md font-label-md text-secondary">Active now</div>
+<button class="mt-lg w-full py-2 bg-primary text-on-primary font-label-md rounded flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-md">add_circle</span>
+                    Add Chat
+                </button>
+</div>
+<nav class="flex-1 overflow-y-auto mt-sm px-xs">
+<!-- Navigation Tabs from JSON -->
+<div class="space-y-1 mb-lg">
+<a class="text-primary font-bold border-l-2 border-primary pl-4 py-2 flex items-center gap-3 bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="text-label-md font-label-md">Chats</span>
+</a>
+<a class="text-secondary p-4 flex items-center gap-3 hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="contacts">contacts</span>
+<span class="text-label-md font-label-md">Contacts</span>
+</a>
+<a class="text-secondary p-4 flex items-center gap-3 hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-label-md font-label-md">Settings</span>
+</a>
+</div>
+<!-- Chat List Sub-Section -->
+<div class="px-md mb-xs">
+<span class="text-label-sm font-label-sm uppercase tracking-widest text-secondary opacity-50">Recent Conversations</span>
+</div>
+<div class="mt-sm">
+<div class="relative group p-4 flex items-center gap-3 cursor-pointer hover:bg-surface-container-low transition-all">
+<div class="chat-active-indicator"></div>
+<img class="w-10 h-10 rounded-full object-cover grayscale" data-alt="A professional headshot of Alex Rivera, a friendly young adult male with dark hair and a soft smile. The lighting is crisp and modern, studio-quality, emphasizing a professional yet approachable aesthetic. The background is a minimalist light gray, fitting a high-end monochrome UI theme. Soft shadows add depth while maintaining a flat, clean design style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbUgDb_zx0aXg9bh_29tGv38R5IqQnbIxaSDDvKScaZ5Jr-gX4abS9xdJyNKcLnytiGABBn-Uxj2lgUAplipLqrm2aXLDODPWJCF1uE53y-1YACaqCMC_IShHcqz87iMreO8mzCb6v4VVONm9AI5SFCjBBV463WE3j323Fz-UAkvlwr1cFOcJgS2XygA8Bo4KZoprQ3ExgGQ0Vqrg4X5CKZF9hc3PH069j4_K399C41ClqNrGtp-fX"/>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline">
+<h3 class="text-body-md font-bold text-primary truncate">Alex Rivera</h3>
+<span class="text-[10px] text-secondary">2m</span>
+</div>
+<p class="text-label-md text-secondary truncate">Sounds good, let's meet then.</p>
+</div>
+</div>
+<div class="group p-4 flex items-center gap-3 cursor-pointer hover:bg-surface-container-low transition-all">
+<div class="w-10 h-10 rounded bg-tertiary text-white flex items-center justify-center font-bold text-xs">PT</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline">
+<h3 class="text-body-md font-bold text-primary truncate">Product Team</h3>
+<span class="text-[10px] text-secondary">15m</span>
+</div>
+<p class="text-label-md text-secondary truncate">Jordan: Updated the design tokens...</p>
+</div>
+</div>
+<div class="group p-4 flex items-center gap-3 cursor-pointer hover:bg-surface-container-low transition-all">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">groups</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline">
+<h3 class="text-body-md font-bold text-primary truncate">Family</h3>
+<span class="text-[10px] text-secondary">1h</span>
+</div>
+<p class="text-label-md text-secondary truncate">Mom: See you all on Sunday!</p>
+</div>
+</div>
+<div class="group p-4 flex items-center gap-3 cursor-pointer hover:bg-surface-container-low transition-all">
+<img class="w-10 h-10 rounded-full object-cover grayscale" data-alt="A high-contrast profile photo of a person with stylish glasses, set against a bright white background. The photography is sharp and artistic, capturing subtle facial textures with a professional studio finish. The aesthetic is extremely minimalist and clean, aligning with an elite software communication tool's visual identity. The lighting creates gentle gradients on the skin." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFeqQ5K4SP2S5wC2Eu8y6yPlySOhU0hnnzjfUyDLQLmu5orLL6YoFqnRohJZiIpgA0MejwPPMu1DYsRbLBVpgjtwGE2ECi_6WAZ9nVd3QItS14uviDZbIGQHLNyukIjTtOdcICI9i90ygg5upij09YIOzjbs0L856_UItTuERzsceW97PZMpczEXJmKbMJcdI6_6rAtDPxxt09gBUBDX6cVmnSuvooQpJIE2kZ0MlIvIknVusQbUbo"/>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline">
+<h3 class="text-body-md font-bold text-primary truncate">Casey Chen</h3>
+<span class="text-[10px] text-secondary">3h</span>
+</div>
+<p class="text-label-md text-secondary truncate">The deployment is live.</p>
+</div>
+</div>
+</div>
+</nav>
+<div class="p-md border-t border-outline-variant">
+<a class="text-secondary p-4 flex items-center gap-3 hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span class="text-label-md font-label-md">Help</span>
+</a>
+<div class="flex items-center gap-3 p-4">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-[10px] font-bold">JD</div>
+<span class="text-label-md font-bold">John Doe</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col ml-72 h-full bg-white relative">
+<!-- TopNavBar Shared Component Shell -->
+<header class="flex justify-between items-center w-full px-lg h-16 border-b border-outline-variant bg-surface-container-lowest">
+<div class="flex items-center gap-md">
+<img class="w-10 h-10 rounded-full object-cover grayscale" data-alt="Close up of Alex Rivera, focused and professional. The image is monochrome, black and white, highlighting the contrast of facial features. The composition is modern and artistic, using shallow depth of field to keep focus entirely on the eyes. The lighting is soft but directional, creating a clean and premium portrait for a high-end application interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1eHOH3BSUhExJwC5Nvef_yXou0tEefkQrNhdVVSXR2lwqMggSUpFSIvZ4cLzP9hl1SdUTN3TP_V3XbfPKwD3qb0LEm8CdE-_PVLHg7hMOQStJ_C_iA9E4bvrFKObFppyab9Wu1hoTYlA6FwCsbivsi2bgPiGjqQ03df11FWYaR8m-lmUwqgpBhtF9XnfnklKiAhs8NRS22TwS_KU1gRVVIGEs0G3ukQOUZbJM2oJXkttL_o24toch"/>
+<div>
+<h1 class="text-body-lg font-bold text-primary leading-tight">Alex Rivera</h1>
+<p class="text-label-sm text-[#22C55E] flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-[#22C55E]"></span> Active now
+                        </p>
+</div>
+</div>
+<nav class="hidden md:flex items-center gap-lg">
+<a class="text-primary font-bold border-b-2 border-primary pb-2 text-label-md" href="#">Recent</a>
+<a class="text-secondary pb-2 text-label-md hover:text-primary transition-all" href="#">Pinned</a>
+<a class="text-secondary pb-2 text-label-md hover:text-primary transition-all" href="#">Archived</a>
+</nav>
+<div class="flex items-center gap-md">
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined text-secondary" data-icon="search">search</span>
+</button>
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined text-secondary" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Chat Canvas -->
+<section class="flex-1 overflow-y-auto p-lg flex flex-col gap-gutter" id="message-container">
+<div class="flex justify-center mb-lg">
+<span class="text-label-sm font-bold bg-surface-container px-3 py-1 rounded-full text-secondary opacity-60">TODAY</span>
+</div>
+<!-- Received Message -->
+<div class="flex items-end gap-md max-w-[80%]">
+<img class="w-6 h-6 rounded-full grayscale mb-1" data-alt="Tiny avatar of Alex Rivera in black and white. The portrait is minimalist, using high key lighting to create a clean, modern look. The subject appears professional and calm, fitting a high-end communication platform's aesthetic. Monochrome color scheme with soft grey tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNa5iLhmZ-6iPtalrikR7KUywMGaHqffGSIURlLfHoBo_WjxG3HqJmACyFKa2nwuNc-I6qEQdQg-zBfrqr_H6zLOp-bM1nUn6V2siS_BsyABYN-o5xRk9WCCEJj6UozrGYY3BU1qD7Nhcr-dehDwhH-mf4I3oMQvtVzILmQUydAGUendBDz3I0rfoAlUrK6ch9GQe59cThPTmeYZy9e60gU8Jv21VAWIW_QORRMuVb6IbBENeyRO0F"/>
+<div class="bg-[#F3F4F6] p-md rounded-xl rounded-bl-none">
+<p class="text-body-md text-primary">Hey! Did you get a chance to look at the latest design system updates?</p>
+<span class="text-[10px] text-secondary mt-1 block">10:42 AM</span>
+</div>
+</div>
+<!-- Sent Message -->
+<div class="flex flex-col items-end gap-xs max-w-[80%] self-end">
+<div class="bg-black p-md rounded-xl rounded-br-none border border-black shadow-sm">
+<p class="text-body-md text-white">Just finished going through them. The monochrome approach for the active states is much cleaner than the previous version.</p>
+<span class="text-[10px] text-white/60 mt-1 block text-right">10:44 AM</span>
+</div>
+</div>
+<!-- Received Message -->
+<div class="flex items-end gap-md max-w-[80%]">
+<img class="w-6 h-6 rounded-full grayscale mb-1" data-alt="Minimalist headshot avatar for a professional chat application. The subject is Alex Rivera, shown in a clean, high-contrast monochrome style. Lighting is designed to emphasize facial structure while keeping the overall image bright and modern. The background is pure white." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnS3J3nGnYQ2ENkD_jku5j8iX2RjQvw-k0gF7fz-XdZ2jfEWYvUEtkSQFU-cLPBH5J2WAzET9zRYMdu34NGN18jMB_G_FczGWgpKBOf0qhriBBG1LFDA70YwVWpW0DNnYyTKJVg07aXtHw4tI1tWabjOy3mqRdaaKTNeRs60zwQxYKXzwZgDfurEM30AcJd83dGsxwCpNjeiVAFWfjB8Kxz8LgISlyahAKksHJCDnrpP-vJemLyrxk"/>
+<div class="bg-[#F3F4F6] p-md rounded-xl rounded-bl-none">
+<p class="text-body-md text-primary">Glad you agree. I think it removes a lot of cognitive load during deep work sessions.</p>
+<span class="text-[10px] text-secondary mt-1 block">10:45 AM</span>
+</div>
+</div>
+<div class="flex items-end gap-md max-w-[80%]">
+<img class="w-6 h-6 rounded-full grayscale mb-1 opacity-0" data-alt="Portrait of Alex Rivera in a minimalist monochrome style. The subject's expression is focused and calm. The lighting is sophisticated, creating a soft but clear definition between the subject and the neutral background. High-quality professional photography suited for a premium software interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCY-oJzYe3KX_d7D-gSddYT_9NNf8WOM4mN_OxxhmYiBu8y_UvIv3ZK2r9OvJ9dhXAMP8gLSNG0k1K_qYmw1cugjvmGjabmPsLLV6OhLdR_KDXQ-E41Gc9exUM1o69pfpcN8v317ZuzYLOKRV96DEUNcuq19DKgLx-E7IDnoGaNPLhwVo3FPNVtjOiUmEa90eQU7tXUEABKKtJTmuLOwkWk_VHyQrx0IPhyFzLBglGFtMPIF9bWKJWv"/> <!-- Hidden avatar for consecutive messages -->
+<div class="bg-[#F3F4F6] p-md rounded-xl rounded-bl-none -mt-3">
+<p class="text-body-md text-primary">Are you free for a quick huddle at 2 PM to finalize the navigation components?</p>
+<span class="text-[10px] text-secondary mt-1 block">10:45 AM</span>
+</div>
+</div>
+<!-- Sent Message -->
+<div class="flex flex-col items-end gap-xs max-w-[80%] self-end">
+<div class="bg-black p-md rounded-xl rounded-br-none border border-black shadow-sm">
+<p class="text-body-md text-white">Sounds good, let's meet then.</p>
+<span class="text-[10px] text-white/60 mt-1 block text-right">10:48 AM</span>
+</div>
+<div class="flex items-center gap-1 text-[10px] text-secondary mt-1">
+<span>Read</span>
+<span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<!-- Typing Indicator -->
+<div class="flex items-end gap-md max-w-[80%] mt-sm opacity-60">
+<img class="w-6 h-6 rounded-full grayscale mb-1" data-alt="Minimalist, professional monochrome profile icon. High-key lighting, professional studio setup. White background. Subject is Alex Rivera." src="https://lh3.googleusercontent.com/aida-public/AB6AXuANVDPWeWBqcg1aGL7c2V7mgGDk9pBQId5MNV6lDbD70gKA8KPkqmLduLN0v2NuXSgyVr7fP1zSDqU9aJFQ0ZPZj7aK-buM9z_4hKfnfcnvflD3vqVmH-cCxlZKhw9q4w8FSrhHNmNM8ptH0c-ACY_76zaMtiwGcRPtG5AIT4aj0EcluLWg7pO53hpZBOymuEOikHgUPZrEnO29vxM3ut-XUIZu-K2di8CSydTb434mnuY9MYmuif07"/>
+<div class="bg-[#F3F4F6] px-4 py-3 rounded-xl rounded-bl-none flex gap-1">
+<div class="w-1 h-1 bg-secondary rounded-full animate-bounce"></div>
+<div class="w-1 h-1 bg-secondary rounded-full animate-bounce [animation-delay:0.2s]"></div>
+<div class="w-1 h-1 bg-secondary rounded-full animate-bounce [animation-delay:0.4s]"></div>
+</div>
+</div>
+</section>
+<!-- Message Input Bar -->
+<footer class="px-lg pb-lg pt-sm bg-white border-t border-outline-variant">
+<div class="max-w-container-max mx-auto relative flex items-center gap-md">
+<button class="p-2 text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined">attach_file</span>
+</button>
+<div class="flex-1 relative">
+<input class="w-full bg-[#F3F4F6] border-none rounded-lg py-3 px-4 text-body-md focus:ring-1 focus:ring-primary focus:bg-white transition-all outline-none" placeholder="Type a message..." type="text"/>
+<div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-sm">
+<button class="text-secondary hover:text-primary">
+<span class="material-symbols-outlined">sentiment_satisfied</span>
+</button>
+</div>
+</div>
+<button class="bg-black text-white w-10 h-10 rounded-lg flex items-center justify-center hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</footer>
+<!-- Background Atmosphere (Micro-interaction layer) -->
+<div class="absolute inset-0 pointer-events-none opacity-5">
+<div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,#000000_1px,transparent_1px)] bg-[length:40px_40px]"></div>
+</div>
+</main>
+</div>
+<script>
+        // Simple micro-interaction for sending messages (UI only)
+        const messageInput = document.querySelector('input');
+        const sendBtn = document.querySelector('button.bg-black.w-10');
+        const container = document.getElementById('message-container');
+
+        const sendMessage = () => {
+            const text = messageInput.value.trim();
+            if (text === '') return;
+
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            const messageEl = document.createElement('div');
+            messageEl.className = 'flex flex-col items-end gap-xs max-w-[80%] self-end animate-in fade-in slide-in-from-bottom-2 duration-300';
+            messageEl.innerHTML = `
+                <div class="bg-black p-md rounded-xl rounded-br-none border border-black shadow-sm">
+                    <p class="text-body-md text-white">${text}</p>
+                    <span class="text-[10px] text-white/60 mt-1 block text-right">${time}</span>
+                </div>
+            `;
+            
+            container.appendChild(messageEl);
+            messageInput.value = '';
+            container.scrollTop = container.scrollHeight;
+
+            // Simple scale effect on click
+            sendBtn.style.transform = 'scale(0.9)';
+            setTimeout(() => sendBtn.style.transform = 'scale(1)', 100);
+        };
+
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Focus interaction
+        messageInput.addEventListener('focus', () => {
+            document.querySelector('footer').classList.add('shadow-lg');
+        });
+        messageInput.addEventListener('blur', () => {
+            document.querySelector('footer').classList.remove('shadow-lg');
+        });
+
+        // Initialize scroll to bottom
+        window.onload = () => {
+            container.scrollTop = container.scrollHeight;
+        };
+    </script>
+</body></html>
