@@ -21,10 +21,11 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 	return &UserRepository{db: db}
 }
 
-func (r *UserRepository) CreateUser(fullname, email, hashedPassword string) error {
-	query := `INSERT INTO users (fullname, email, password, created_at) VALUES ($1, $2, $3, $4)`
-	_, err := r.db.Exec(query, fullname, email, hashedPassword, time.Now())
-	return err
+func (r *UserRepository) CreateUser(fullname, email, hashedPassword string) (int64, error) {
+	query := `INSERT INTO users (fullname, email, password, created_at) VALUES ($1, $2, $3, $4) RETURNING id`
+	var id int64
+	err := r.db.QueryRow(query, fullname, email, hashedPassword, time.Now()).Scan(&id)
+	return id, err
 }
 
 func (r *UserRepository) GetUserByEmail(email string)(*User, error){

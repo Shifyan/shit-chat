@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // Development toggle: set to true to bypass session protection checks
-const BYPASS_AUTH = true;
+const BYPASS_AUTH = false;
 
 /**
  * Next.js Middleware route-guard.
@@ -16,7 +16,7 @@ export function proxy(request: NextRequest) {
 
   if (isProtectedPath && !BYPASS_AUTH) {
     // Check for active token cookie
-    const token = request.cookies.get("auth_token")?.value;
+    const token = request.cookies.get("token")?.value;
 
     if (!token) {
       // Redirect unauthorized user to /login

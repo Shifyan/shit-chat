@@ -4,7 +4,6 @@ import (
 	"backend/internal/repository"
 	"backend/pkg/jwt"
 	"errors"
-	"fmt"
 	"strconv"
 
 	"golang.org/x/crypto/bcrypt"
@@ -18,17 +17,26 @@ func NewAuthService(repo *repository.UserRepository) *AuthService {
 	return &AuthService{userRepo: repo}
 }
 
-func (s *AuthService) Register(fullname, email, password string) (error) {
+func (s *AuthService) Register(fullname, email, password string) (string, error) {
 	existingUser, _ := s.userRepo.GetUserByEmail(email)
 	if existingUser != nil {
-		return errors.New("email already exists")
+		return "", errors.New("email already exists")
 	}
 	hashedPassword, err:= bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		fmt.Println("Error hashing password:", err)
-		return err
+		return "", err
 	}
-	return s.userRepo.CreateUser(fullname,email,string(hashedPassword))
+	newUserID, err := s.userRepo.CreateUser(fullname,email,string(hashedPassword))
+	if err != nil{
+		return "", err
+	}
+
+	userIDStr:=strconv.FormatInt(newUserID, 10)
+	token, err := jwt.GenerateToken(userIDStr)
+	if err != nil{
+		return "", err
+	}
+	return token, nil
 }
 
 func (s *AuthService) Login(email, password string) (string, error){

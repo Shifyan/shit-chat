@@ -2,7 +2,6 @@ package http
 
 import (
 	"backend/internal/usecase"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -30,14 +29,22 @@ func NewAuthController(s *usecase.AuthService) *AuthController{
 func (ctrl *AuthController) Register(c *gin.Context){
 	var req AuthRequest
 	if err:= c.ShouldBindJSON(&req); err != nil{
-		c.JSON(http.StatusBadRequest, gin.H{"error":"Invalid Input"})
+		c.JSON(http.StatusBadRequest, gin.H{"message":"Invalid Input"})
 		return
 	}
-	err := ctrl.authService.Register(req.Fullname, req.Email, req.Password)
+	token, err := ctrl.authService.Register(req.Fullname, req.Email, req.Password)
 	if err != nil{
-		c.JSON(http.StatusInternalServerError, gin.H{"error":err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message":err.Error()})
 		return
 	}
+	c.SetCookie(
+		"token", token,
+		3600*24*7,
+		"/",
+		"localhost",
+		false,
+		true,
+	)
 	c.JSON(http.StatusOK, gin.H{"message":"User registered successfully"})
 }
 
@@ -50,13 +57,18 @@ func (ctrl *AuthController) Login(c *gin.Context) {
         return
     }
     
-    fmt.Println("Email:", req.Email)
-    fmt.Println("Password:", req.Password)
-    
     token, err := ctrl.authService.Login(req.Email, req.Password)
     if err != nil {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Credentials"})
+        c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid Credentials"})
         return
     }
-    c.JSON(http.StatusOK, gin.H{"token": token})
+	c.SetCookie(
+		"token", token,
+		3600*24*7,
+		"/",
+		"localhost",
+		false,
+		true,
+	)
+    c.JSON(http.StatusOK, gin.H{"message":"User logged in successfully"})
 }
