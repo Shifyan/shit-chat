@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRegister } from "@/service/auth.service";
+import { ApiError } from "@/lib/swr";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -45,9 +46,8 @@ export default function RegisterScreen() {
       // Handle success — e.g., redirect or show toast
       router.push("/");
     } catch (err) {
-      // Error already handled by SWR error callback if provided
-      console.error("Register failed:", err);
-      toast.error("Register failed");
+      const msg = err instanceof ApiError ? err.message : "Register failed";
+      toast.error(msg);
     }
   };
 

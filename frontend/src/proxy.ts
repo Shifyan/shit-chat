@@ -13,15 +13,21 @@ export function proxy(request: NextRequest) {
 
   // Protect index route which is our message chat layout page
   const isProtectedPath = pathname === "/";
+  const isAuthPath = pathname === "/login" || pathname === "/register";
+  const token = request.cookies.get("token")?.value;
 
   if (isProtectedPath && !BYPASS_AUTH) {
-    // Check for active token cookie
-    const token = request.cookies.get("token")?.value;
-
     if (!token) {
       // Redirect unauthorized user to /login
       const loginUrl = new URL("/login", request.url);
       return NextResponse.redirect(loginUrl);
+    }
+  }
+  if (isAuthPath && !BYPASS_AUTH) {
+    if (token) {
+      // Redirect authorized user to /
+      const homeUrl = new URL("/", request.url);
+      return NextResponse.redirect(homeUrl);
     }
   }
 

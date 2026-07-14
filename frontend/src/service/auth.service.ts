@@ -33,7 +33,7 @@ export interface AuthResponse {
 // ---------------------------------------------------------------------------
 
 /**
- * useLogin — triggers POST /auth/login
+ * useLogin — triggers POST /login
  *
  * @example
  * const { trigger, isMutating, error } = useLogin();
@@ -46,7 +46,7 @@ export function useLogin(
 }
 
 /**
- * useRegister — triggers POST /auth/register
+ * useRegister — triggers POST /register
  *
  * @example
  * const { trigger, isMutating, error } = useRegister();
@@ -56,4 +56,17 @@ export function useRegister(
   options?: Parameters<typeof useMutation<AuthResponse, RegisterRequest>>[1],
 ) {
   return useMutation<AuthResponse, RegisterRequest>("/register", options);
+}
+
+/**
+ * useLogout — triggers POST /logout
+ *
+ * @example
+ * const { trigger, isMutating, error } = useLogout();
+ * await trigger({ method: "POST" });
+ */
+export function useLogout(
+  options?: Parameters<typeof useMutation<AuthResponse>>[1],
+) {
+  return useMutation<AuthResponse>("/logout", options);
 }

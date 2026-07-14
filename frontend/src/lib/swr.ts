@@ -39,8 +39,10 @@ export async function fetcher<T>(path: string): Promise<T> {
   });
 
   if (!res.ok) {
-    const body = await res.json().catch(() => ({ message: res.statusText }));
-    throw new ApiError(body?.message ?? "Request failed", res.status);
+    const body = await res.json().catch(() => ({}));
+    const msg =
+      body?.message ?? body?.error ?? res.statusText ?? "Request failed";
+    throw new ApiError(msg, res.status);
   }
 
   return res.json() as Promise<T>;
@@ -69,8 +71,11 @@ export async function mutationFetcher<T, B = unknown>(
   });
 
   if (!res.ok) {
-    const errBody = await res.json().catch(() => ({ message: res.statusText }));
-    throw new ApiError(errBody?.message ?? "Request failed", res.status);
+    const errBody = await res.json().catch(() => ({}));
+    // Backend may use `error` or `message` field
+    const msg =
+      errBody?.message ?? errBody?.error ?? res.statusText ?? "Request failed";
+    throw new ApiError(msg, res.status);
   }
 
   // 204 No Content — return null
@@ -131,12 +136,10 @@ export const swrConfig: SWRConfiguration = {
   revalidateOnFocus: false,
   revalidateOnReconnect: true,
   shouldRetryOnError: false,
-  onError(err: ApiError) {
-    if (err.status === 401 && typeof window !== "undefined") {
-      // 👇 TAMBAHKAN CEK: Hanya redirect jika user TIDAK di halaman login
-      if (window.location.pathname !== "/login") {
-        window.location.href = "/login";
-      }
-    }
-  },
+  // ⚠️  Do NOT add onError 401 redirect here.
+  // SWRConfig.onError fires for useSWRMutation too.
+  // A 401 from login/register would trigger a redirect and swallow the error
+  // before the component catch block can display a message.
+  // Handle 401 redirect per useFetch call via the onError option:
+  //   useFetch("/protected", { onError: (e) => e.status === 401 && router.push("/login") })
 };

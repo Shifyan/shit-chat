@@ -432,7 +432,7 @@ export default function ChatScreen() {
 
         {/* Decorative Grid Micro-interaction layer */}
         <div className="absolute inset-0 pointer-events-none opacity-[0.03] z-0">
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,#000000_1px,transparent_1px)] bg-[length:40px_40px]"></div>
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,#000000_1px,transparent_1px)] bg-position-[40px_40px]"></div>
         </div>
       </main>
     </div>

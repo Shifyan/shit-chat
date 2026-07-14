@@ -34,7 +34,7 @@ func (ctrl *AuthController) Register(c *gin.Context){
 	}
 	token, err := ctrl.authService.Register(req.Fullname, req.Email, req.Password)
 	if err != nil{
-		c.JSON(http.StatusInternalServerError, gin.H{"message":err.Error()})
+		c.JSON(http.StatusConflict, gin.H{"message":err.Error()})
 		return
 	}
 	c.SetCookie(
@@ -53,13 +53,13 @@ func (ctrl *AuthController) Login(c *gin.Context) {
     
     if err := c.ShouldBindJSON(&req); err != nil {
         // PERBAIKAN: Kembalikan err.Error() agar Anda bisa melihat penyebab aslinya di response
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
         return
     }
     
     token, err := ctrl.authService.Login(req.Email, req.Password)
     if err != nil {
-        c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid Credentials"})
+        c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
         return
     }
 	c.SetCookie(
@@ -71,4 +71,16 @@ func (ctrl *AuthController) Login(c *gin.Context) {
 		true,
 	)
     c.JSON(http.StatusOK, gin.H{"message":"User logged in successfully"})
+}
+
+func (ctrl *AuthController) Logout(c *gin.Context){
+	c.SetCookie(
+		"token", "",
+		-1,
+		"/",
+		"localhost",
+		false,
+		true,
+	)
+	c.JSON(http.StatusOK, gin.H{"message":"Logout"})
 }

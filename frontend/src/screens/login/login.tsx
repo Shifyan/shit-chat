@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLogin } from "@/service/auth.service";
+import { ApiError } from "@/lib/swr";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -37,13 +38,12 @@ export default function LoginScreen() {
     e.preventDefault();
     try {
       const res = await login({ method: "POST", body: formData });
+      console.log(res);
       // Handle success — e.g., redirect or show toast
-      if (res.message) {
-        router.push("/");
-      }
+      router.push("/");
     } catch (err) {
-      // Error already handled by SWR error callback if provided
-      toast.error("Login failed");
+      const msg = err instanceof ApiError ? err.message : "Login failed";
+      toast.error(msg);
     }
   };
 

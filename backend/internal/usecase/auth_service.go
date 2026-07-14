@@ -3,6 +3,7 @@ package usecase
 import (
 	"backend/internal/repository"
 	"backend/pkg/jwt"
+	"database/sql" // Tambahkan ini untuk mengecek error sql
 	"errors"
 	"strconv"
 
@@ -18,42 +19,52 @@ func NewAuthService(repo *repository.UserRepository) *AuthService {
 }
 
 func (s *AuthService) Register(fullname, email, password string) (string, error) {
-	existingUser, _ := s.userRepo.GetUserByEmail(email)
-	if existingUser != nil {
-		return "", errors.New("email already exists")
+	// 1. Perbaiki penanganan error di sini
+	existingUser, err := s.userRepo.GetUserByEmail(email)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		// Jika error bukan karena data kosong (misal: db putus), kembalikan error internal
+		return "", err 
 	}
-	hashedPassword, err:= bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	
+	// Jika user ditemukan (tidak nil), berarti email sudah terdaftar
+	if existingUser != nil {
+		return "", errors.New("Email Already Exists")
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
 	}
-	newUserID, err := s.userRepo.CreateUser(fullname,email,string(hashedPassword))
-	if err != nil{
+
+	newUserID, err := s.userRepo.CreateUser(fullname, email, string(hashedPassword))
+	if err != nil {
 		return "", err
 	}
 
-	userIDStr:=strconv.FormatInt(newUserID, 10)
+	userIDStr := strconv.FormatInt(newUserID, 10)
 	token, err := jwt.GenerateToken(userIDStr)
-	if err != nil{
+	if err != nil {
 		return "", err
 	}
 	return token, nil
 }
 
-func (s *AuthService) Login(email, password string) (string, error){
+func (s *AuthService) Login(email, password string) (string, error) {
 	user, err := s.userRepo.GetUserByEmail(email)
-	if err != nil{
-		return "", errors.New(("username or password invalid"))
+	if err != nil {
+		// Menggunakan pesan generik sudah sangat tepat untuk keamanan
+		return "", errors.New("Invalid Username or Password") 
 	}
+
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-	if err != nil{
-		return "", errors.New(("username or password invalid"))
+	if err != nil {
+		return "", errors.New("Invalid Username or Password")
 	}
 
 	userIDStr := strconv.FormatInt(user.ID, 10)
 	token, err := jwt.GenerateToken(userIDStr)
-	if err != nil{
+	if err != nil {
 		return "", err
 	}
 	return token, nil
-
 }

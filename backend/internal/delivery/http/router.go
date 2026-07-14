@@ -10,5 +10,6 @@ func MapRoutes(r *gin.Engine, authCtrl *AuthController) {
 	{
 		api.POST("/register", authCtrl.Register)
 		api.POST("/login", authCtrl.Login)
+		api.POST("/logout", authCtrl.Logout)
 	}
 }
