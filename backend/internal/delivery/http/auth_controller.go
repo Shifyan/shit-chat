@@ -29,6 +29,14 @@ func NewAuthController(s *usecase.AuthService) *AuthController{
 func (ctrl *AuthController) Register(c *gin.Context){
 	var req AuthRequest
 	if err:= c.ShouldBindJSON(&req); err != nil{
+		if len(req.Fullname) < 3 {
+			c.JSON(http.StatusBadRequest, gin.H{"message":"Fullname must be at least 3 characters long"})
+			return	
+		}
+		if len(req.Password) < 8 {
+			c.JSON(http.StatusBadRequest, gin.H{"message":"Password must be at least 8 characters long"})
+			return
+		}
 		c.JSON(http.StatusBadRequest, gin.H{"message":"Invalid Input"})
 		return
 	}
@@ -53,7 +61,11 @@ func (ctrl *AuthController) Login(c *gin.Context) {
     
     if err := c.ShouldBindJSON(&req); err != nil {
         // PERBAIKAN: Kembalikan err.Error() agar Anda bisa melihat penyebab aslinya di response
-        c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		if len(req.Password) < 8 {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Password must be at least 8 characters long"})
+			return
+		}
+        c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to Login"})
         return
     }
     

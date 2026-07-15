@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { SWRConfig } from "swr";
 import { swrConfig } from "@/lib/swr";
 import { Toaster } from "@/components/ui/sonner";
+import { ToastListener } from "@/components/toastListener";
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
@@ -45,7 +46,18 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <SWRConfig value={swrConfig}>{children}</SWRConfig>
-        <Toaster />
+        <Toaster
+          closeButton={false}
+          position="top-center"
+          toastOptions={{
+            classNames: {
+              description: "!text-black",
+              toast: "!border-black",
+            },
+            duration: 5000,
+          }}
+        />
+        <ToastListener />
       </body>
     </html>
   );

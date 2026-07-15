@@ -38,12 +38,19 @@ export default function LoginScreen() {
     e.preventDefault();
     try {
       const res = await login({ method: "POST", body: formData });
-      console.log(res);
       // Handle success — e.g., redirect or show toast
+      const toastPayload = {
+        title: "Login Success",
+        description: res.message,
+        status: "success",
+      };
+      localStorage.setItem("toast", JSON.stringify(toastPayload));
       router.push("/");
     } catch (err) {
       const msg = err instanceof ApiError ? err.message : "Login failed";
-      toast.error(msg);
+      toast.error("Login Failed", {
+        description: msg,
+      });
     }
   };
 

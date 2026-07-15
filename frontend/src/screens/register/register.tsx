@@ -42,12 +42,18 @@ export default function RegisterScreen() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await register({ method: "POST", body: formData });
+      const res = await register({ method: "POST", body: formData });
       // Handle success — e.g., redirect or show toast
+      const toastPayload = {
+        title: "Register Success",
+        description: res.message,
+        status: "success",
+      };
+      localStorage.setItem("toast", JSON.stringify(toastPayload));
       router.push("/");
     } catch (err) {
       const msg = err instanceof ApiError ? err.message : "Register failed";
-      toast.error(msg);
+      toast.error("Register Failed", { description: msg });
     }
   };
 

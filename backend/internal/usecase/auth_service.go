@@ -50,6 +50,10 @@ func (s *AuthService) Register(fullname, email, password string) (string, error)
 }
 
 func (s *AuthService) Login(email, password string) (string, error) {
+	if len(password) < 8 {
+		return "", errors.New("Password must be at least 8 characters long")
+	}
+
 	user, err := s.userRepo.GetUserByEmail(email)
 	if err != nil {
 		// Menggunakan pesan generik sudah sangat tepat untuk keamanan

@@ -6,6 +6,11 @@ import (
 	"backend/internal/usecase"
 	"backend/pkg/database"
 	"log"
+	"time"
+
+	"github.com/ulule/limiter/v3"
+	mgin "github.com/ulule/limiter/v3/drivers/middleware/gin"
+	"github.com/ulule/limiter/v3/drivers/store/memory"
 
 	"github.com/gin-gonic/gin"
 )
@@ -43,9 +48,15 @@ if err != nil {
 }
 defer db.Close()
 
+rate := limiter.Rate{Period: 10*time.Second, Limit: 5}
+store := memory.NewStore()
+middleware:= mgin.NewMiddleware(limiter.New(store,rate))
+r.Use(middleware)
 userRepo := repository.NewUserRepository(db)
 authService := usecase.NewAuthService(userRepo)
 authCtrl := http.NewAuthController(authService)
+
+
 
 http.MapRoutes(r, authCtrl)
 
