@@ -1,7 +1,8 @@
 package main
 
 import (
-	"backend/internal/delivery/http"
+	delivery "backend/internal/delivery/http"
+	"backend/internal/delivery/ws"
 	"backend/internal/repository"
 	"backend/internal/usecase"
 	"backend/pkg/database"
@@ -15,50 +16,74 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
-
 func main() {
-r := gin.Default()
-r.Use(func(c *gin.Context) {
-    c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000") // URL Frontend Anda
-    c.Writer.Header().Set("Access-Control-Allow-Credentials", "true") // Wajib true untuk cookie
-    c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-    c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+	r := gin.Default()
 
-    // JIKA REQUEST ADALAH OPTIONS, LANGSUNG PUTUS DAN KEMBALIKAN 204
-    if c.Request.Method == "OPTIONS" {
-        c.AbortWithStatus(204)
-        return
-    }
+	// CORS middleware
+	r.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
 
-    c.Next()
-})
-dbConfig := database.Config{
-	Host: "127.0.0.1",
-	Port: "5432",
-	User: "postgres",
-	Password: "root",
-	DBName: "shit_chat",
-	SSLMode: "disable",
-}
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
 
-db, err := database.InitPostgres(dbConfig)
-if err != nil {
-	log.Fatal("Failed to connect to database:", err)
-}
-defer db.Close()
+		c.Next()
+	})
 
-rate := limiter.Rate{Period: 10*time.Second, Limit: 5}
-store := memory.NewStore()
-middleware:= mgin.NewMiddleware(limiter.New(store,rate))
-r.Use(middleware)
-userRepo := repository.NewUserRepository(db)
-authService := usecase.NewAuthService(userRepo)
-authCtrl := http.NewAuthController(authService)
+	dbConfig := database.Config{
+		Host:     "127.0.0.1",
+		Port:     "5432",
+		User:     "postgres",
+		Password: "root",
+		DBName:   "shit_chat",
+		SSLMode:  "disable",
+	}
 
+	db, err := database.InitPostgres(dbConfig)
+	if err != nil {
+		log.Fatal("Failed to connect to database:", err)
+	}
+	defer db.Close()
 
+	// Run embedded migrations (idempotent)
+	if err := database.ApplyMigrations(db); err != nil {
+		log.Fatal("Failed to apply migrations:", err)
+	}
 
-http.MapRoutes(r, authCtrl)
+	// Scoped rate limiters
+	authRate := limiter.Rate{Period: 10 * time.Second, Limit: 5}
+	authStore := memory.NewStore()
+	authLimiter := mgin.NewMiddleware(limiter.New(authStore, authRate))
 
-r.Run(":8080")
+	chatRate := limiter.Rate{Period: 10 * time.Second, Limit: 120}
+	chatStore := memory.NewStore()
+	chatLimiter := mgin.NewMiddleware(limiter.New(chatStore, chatRate))
+
+	// Repositories
+	userRepo := repository.NewUserRepository(db)
+	chatRepo := repository.NewChatRepository(db)
+	msgRepo := repository.NewMessageRepository(db)
+
+	// Services
+	authService := usecase.NewAuthService(userRepo)
+	chatService := usecase.NewChatService(chatRepo, msgRepo, userRepo)
+
+	// WebSocket
+	hub := ws.NewHub()
+	go hub.Run()
+	wsHandler := ws.NewHandler(hub, chatService)
+
+	// Controllers
+	authCtrl := delivery.NewAuthController(authService)
+	userCtrl := delivery.NewUserController(userRepo)
+	chatCtrl := delivery.NewChatController(chatService, hub)
+
+	// Map routes
+	delivery.MapRoutes(r, authCtrl, userCtrl, chatCtrl, wsHandler, authLimiter, chatLimiter)
+
+	r.Run(":8080")
 }

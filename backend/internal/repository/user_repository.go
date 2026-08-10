@@ -39,3 +39,49 @@ func (r *UserRepository) GetUserByEmail(email string)(*User, error){
 	}
 	return &user, nil
 }
+
+// GetUserByID returns a user by their ID (without the password hash).
+func (r *UserRepository) GetUserByID(id int64) (*User, error) {
+	query := `SELECT id, fullname, email, created_at FROM users WHERE id = $1`
+	row := r.db.QueryRow(query, id)
+
+	var user User
+	err := row.Scan(&user.ID, &user.Fullname, &user.Email, &user.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+// UserBrief is a lighter projection for search results.
+type UserBrief struct {
+	ID       int64  `json:"id"`
+	Fullname string `json:"fullname"`
+	Email    string `json:"email"`
+}
+
+// SearchUsers returns users whose fullname or email matches the query (case-insensitive prefix).
+// It excludes the given user ID and limits results.
+func (r *UserRepository) SearchUsers(q string, excludeID int64, limit int) ([]UserBrief, error) {
+	query := `SELECT id, fullname, email FROM users
+		WHERE (LOWER(fullname) LIKE LOWER($1) OR LOWER(email) LIKE LOWER($1))
+		AND id != $2
+		ORDER BY fullname ASC
+		LIMIT $3`
+
+	rows, err := r.db.Query(query, q+"%", excludeID, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []UserBrief
+	for rows.Next() {
+		var u UserBrief
+		if err := rows.Scan(&u.ID, &u.Fullname, &u.Email); err != nil {
+			return nil, err
+		}
+		users = append(users, u)
+	}
+	return users, rows.Err()
+}

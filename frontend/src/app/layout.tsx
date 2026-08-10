@@ -1,3 +1,4 @@
+import { ThemeProvider } from "@/components/theme-provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
@@ -35,6 +36,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={cn(
         "h-full",
         "antialiased",
@@ -45,19 +47,21 @@ export default function RootLayout({
       )}
     >
       <body className="min-h-full flex flex-col">
-        <SWRConfig value={swrConfig}>{children}</SWRConfig>
-        <Toaster
-          closeButton={false}
-          position="top-center"
-          toastOptions={{
-            classNames: {
-              description: "!text-black",
-              toast: "!border-black",
-            },
-            duration: 5000,
-          }}
-        />
-        <ToastListener />
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+          <SWRConfig value={swrConfig}>{children}</SWRConfig>
+          <Toaster
+            closeButton={false}
+            position="top-center"
+            toastOptions={{
+              classNames: {
+                description: "!text-black",
+                toast: "!border-black",
+              },
+              duration: 5000,
+            }}
+          />
+          <ToastListener />
+        </ThemeProvider>
       </body>
     </html>
   );
