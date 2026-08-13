@@ -50,11 +50,12 @@ type ChatSummary struct {
 	ID           int64      `json:"id"`
 	Name         *string    `json:"name"`
 	IsGroup      bool       `json:"is_group"`
-	OtherUser    *UserBrief `json:"other_user,omitempty"`
-	LastMessage  *MessageWithSender `json:"last_message,omitempty"`
-	UnreadCount  int        `json:"unread_count"`
-	LastReadAt   *time.Time `json:"last_read_at"`
-	CreatedAt    time.Time  `json:"created_at"`
+	OtherUser        *UserBrief `json:"other_user,omitempty"`
+	LastMessage      *MessageWithSender `json:"last_message,omitempty"`
+	UnreadCount      int        `json:"unread_count"`
+	LastReadAt       *time.Time `json:"last_read_at"`
+	OtherLastReadAt  *time.Time `json:"other_last_read_at,omitempty"` // 1:1: recipient's read watermark
+	CreatedAt        time.Time  `json:"created_at"`
 }
 
 // MessagesResponse is the paginated message history response.

@@ -4,6 +4,7 @@ import (
 	"backend/internal/domain"
 	"backend/internal/repository"
 	"errors"
+	"strings"
 )
 
 type ChatService struct {
@@ -37,6 +38,29 @@ func (s *ChatService) CreateDirectChat(userID, targetID int64) (*domain.Chat, er
 	}
 
 	return s.chatRepo.GetOrCreateDirectChat(userID, targetID)
+}
+
+// CreateGroupChat validates and creates a group chat. Duplicate/self member IDs
+// are deduped; user existence is enforced by FK constraints.
+func (s *ChatService) CreateGroupChat(creatorID int64, name string, memberIDs []int64) (*domain.Chat, error) {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return nil, errors.New("group name is required")
+	}
+
+	seen := map[int64]bool{creatorID: true}
+	var members []int64
+	for _, id := range memberIDs {
+		if !seen[id] {
+			seen[id] = true
+			members = append(members, id)
+		}
+	}
+	if len(members) == 0 {
+		return nil, errors.New("group needs at least one other member")
+	}
+
+	return s.chatRepo.CreateGroupChat(creatorID, name, members)
 }
 
 // GetChats returns all chats for a user with enriched metadata.

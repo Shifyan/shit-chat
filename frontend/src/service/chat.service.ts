@@ -45,6 +45,7 @@ export interface ChatSummary {
   last_message?: MessageData;
   unread_count: number;
   last_read_at: string | null;
+  other_last_read_at?: string | null;
   created_at: string;
 }
 
@@ -74,9 +75,13 @@ export function useChats() {
   });
 }
 
-/** Create a 1:1 chat. */
+/** Create a 1:1 chat ({ user_id }) or group chat ({ name, member_ids }). */
+export type CreateChatBody =
+  | { user_id: number }
+  | { name: string; member_ids: number[] };
+
 export function useCreateChat() {
-  return useMutation<{ chat: { id: number } }, { user_id: number }>("/chats");
+  return useMutation<{ chat: { id: number } }, CreateChatBody>("/chats");
 }
 
 /** Paginated message history for a chat. Pass null to skip. */

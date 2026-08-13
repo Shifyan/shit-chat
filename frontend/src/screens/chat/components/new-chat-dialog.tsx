@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { X, MagnifyingGlass } from "@phosphor-icons/react";
+import { X, MagnifyingGlass, Check } from "@phosphor-icons/react";
 import { useSearchUsers, useCreateChat } from "@/service/chat.service";
 import { toast } from "sonner";
 
@@ -11,8 +11,11 @@ interface NewChatDialogProps {
 }
 
 export function NewChatDialog({ onClose, onChatCreated }: NewChatDialogProps) {
+  const [mode, setMode] = useState<"direct" | "group">("direct");
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [groupName, setGroupName] = useState("");
+  const [selected, setSelected] = useState<number[]>([]);
   const { data: usersData, isLoading } = useSearchUsers(debouncedQuery);
   const { trigger: createChat, isMutating } = useCreateChat();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -27,13 +30,32 @@ export function NewChatDialog({ onClose, onChatCreated }: NewChatDialogProps) {
     return () => clearTimeout(timer);
   }, [query]);
 
-  const handleCreateChat = async (userId: number) => {
+  const handleCreateDirect = async (userId: number) => {
     try {
       const res = await createChat({ method: "POST", body: { user_id: userId } });
       onChatCreated(res.chat.id);
     } catch {
       toast.error("Failed to create chat");
     }
+  };
+
+  const handleCreateGroup = async () => {
+    if (!groupName.trim() || selected.length === 0) return;
+    try {
+      const res = await createChat({
+        method: "POST",
+        body: { name: groupName.trim(), member_ids: selected },
+      });
+      onChatCreated(res.chat.id);
+    } catch (e) {
+      toast.error((e as { message?: string })?.message ?? "Failed to create group");
+    }
+  };
+
+  const toggleMember = (id: number) => {
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
   };
 
   const users = usersData?.users ?? [];
@@ -60,6 +82,34 @@ export function NewChatDialog({ onClose, onChatCreated }: NewChatDialogProps) {
             <X className="size-5 text-secondary" />
           </button>
         </div>
+
+        {/* Mode toggle */}
+        <div className="flex bg-surface-container-low rounded-default p-1 text-label-md font-medium">
+          {(["direct", "group"] as const).map((m) => (
+            <button
+              key={m}
+              className={`flex-1 py-1.5 rounded-sm transition-colors cursor-pointer ${
+                mode === m
+                  ? "bg-surface-container-lowest text-primary shadow-sm"
+                  : "text-secondary"
+              }`}
+              onClick={() => setMode(m)}
+            >
+              {m === "direct" ? "Direct" : "Group"}
+            </button>
+          ))}
+        </div>
+
+        {/* Group name */}
+        {mode === "group" && (
+          <input
+            className="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant rounded-default text-body-md focus:outline-none focus:border-primary transition-colors"
+            placeholder="Group name…"
+            value={groupName}
+            onChange={(e) => setGroupName(e.target.value)}
+            aria-label="Group name"
+          />
+        )}
 
         {/* Search */}
         <div className="relative">
@@ -94,32 +144,61 @@ export function NewChatDialog({ onClose, onChatCreated }: NewChatDialogProps) {
             </p>
           )}
 
-          {users.map((user) => (
-            <button
-              key={user.id}
-              className="w-full flex items-center gap-md p-sm hover:bg-surface-container-low rounded-default transition-colors cursor-pointer disabled:opacity-50"
-              onClick={() => handleCreateChat(user.id)}
-              disabled={isMutating}
-            >
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold text-xs shrink-0">
-                {user.fullname
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .toUpperCase()
-                  .slice(0, 2)}
-              </div>
-              <div className="text-left min-w-0">
-                <p className="text-body-md font-bold text-primary truncate leading-body-md">
-                  {user.fullname}
-                </p>
-                <p className="text-label-md text-secondary truncate leading-label-md">
-                  {user.email}
-                </p>
-              </div>
-            </button>
-          ))}
+          {users.map((user) => {
+            const isSelected = selected.includes(user.id);
+            return (
+              <button
+                key={user.id}
+                className="w-full flex items-center gap-md p-sm hover:bg-surface-container-low rounded-default transition-colors cursor-pointer disabled:opacity-50"
+                onClick={() =>
+                  mode === "group" ? toggleMember(user.id) : handleCreateDirect(user.id)
+                }
+                disabled={isMutating}
+              >
+                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold text-xs shrink-0">
+                  {user.fullname
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2)}
+                </div>
+                <div className="text-left min-w-0 flex-1">
+                  <p className="text-body-md font-bold text-primary truncate leading-body-md">
+                    {user.fullname}
+                  </p>
+                  <p className="text-label-md text-secondary truncate leading-label-md">
+                    {user.email}
+                  </p>
+                </div>
+                {mode === "group" && (
+                  <div
+                    className={`w-5 h-5 rounded-sm border flex items-center justify-center shrink-0 transition-colors ${
+                      isSelected
+                        ? "bg-primary border-primary text-on-primary"
+                        : "border-outline text-transparent"
+                    }`}
+                  >
+                    <Check className="size-3" weight="bold" />
+                  </div>
+                )}
+              </button>
+            );
+          })}
         </div>
+
+        {/* Group create button */}
+        {mode === "group" && (
+          <button
+            className="w-full py-2 bg-primary text-on-primary font-label-md font-medium rounded-default flex items-center justify-center gap-sm hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleCreateGroup}
+            disabled={isMutating || !groupName.trim() || selected.length === 0}
+          >
+            {isMutating
+              ? "Creating…"
+              : `Create group (${selected.length} member${selected.length === 1 ? "" : "s"})`}
+          </button>
+        )}
       </div>
     </div>
   );

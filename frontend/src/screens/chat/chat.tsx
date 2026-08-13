@@ -11,6 +11,7 @@ export default function ChatScreen() {
   const { data: me, isLoading: meLoading, error: meError } = useMe();
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
 
   // Auth gate
   useEffect(() => {
@@ -49,13 +50,15 @@ export default function ChatScreen() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-surface-container-lowest selection:bg-primary selection:text-on-primary">
-      {/* Desktop sidebar — always visible */}
-      <div className="hidden md:block w-72 h-full shrink-0">
-        <Sidebar
-          selectedChatId={selectedChatId}
-          onSelectChat={handleSelectChat}
-        />
-      </div>
+      {/* Desktop sidebar — collapsible */}
+      {desktopSidebarOpen && (
+        <div className="hidden md:block w-72 h-full shrink-0">
+          <Sidebar
+            selectedChatId={selectedChatId}
+            onSelectChat={handleSelectChat}
+          />
+        </div>
+      )}
 
       {/* Mobile sidebar — overlay */}
       {mobileSidebarOpen && (
@@ -79,7 +82,12 @@ export default function ChatScreen() {
       {/* Main pane */}
       <ChatPane
         selectedChatId={selectedChatId}
-        onToggleSidebar={() => setMobileSidebarOpen((v) => !v)}
+        onToggleSidebar={() => {
+          // Desktop: collapse sidebar. Mobile: toggle drawer.
+          const isMobile = window.innerWidth < 768;
+          if (isMobile) setMobileSidebarOpen((v) => !v);
+          else setDesktopSidebarOpen((v) => !v);
+        }}
       />
     </div>
   );

@@ -103,7 +103,8 @@ export function MessageList({ messages, pendingMessages, chat }: MessageListProp
             isSent={isSent}
             body={msg.body}
             time={time}
-            isRead={isSent && chat?.last_read_at != null && new Date(chat.last_read_at) >= new Date(msg.created_at)}
+            isRead={isSent && chat?.other_last_read_at != null && new Date(chat.other_last_read_at) >= new Date(msg.created_at)}
+            senderName={chat?.is_group && !isSent ? msg.sender_name : undefined}
           />
         );
       })}

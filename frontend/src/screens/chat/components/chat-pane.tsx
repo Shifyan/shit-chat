@@ -23,6 +23,7 @@ export function ChatPane({ selectedChatId, onToggleSidebar }: ChatPaneProps) {
   const [pendingMessages, setPendingMessages] = useState<Map<string, { tempId: string; body: string }>>(new Map());
   const [typingUser, setTypingUser] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const lastReadIdRef = useRef<number | null>(null);
 
   const chat: ChatSummary | undefined = chatsData?.chats?.find((c) => c.id === selectedChatId);
   const displayName = chat?.is_group
@@ -47,6 +48,17 @@ export function ChatPane({ selectedChatId, onToggleSidebar }: ChatPaneProps) {
     if (selectedChatId == null) return;
     send({ type: "join_chat", chat_id: selectedChatId });
   }, [selectedChatId, send]);
+
+  // Mark the chat read when opened — clears the unread badge.
+  // Guarded by ref so revalidations don't resend.
+  useEffect(() => {
+    if (selectedChatId == null || !historyData?.messages?.length) return;
+    const lastMsg = historyData.messages[historyData.messages.length - 1];
+    if (lastReadIdRef.current !== lastMsg.id) {
+      lastReadIdRef.current = lastMsg.id;
+      send({ type: "read", chat_id: selectedChatId, last_read_message_id: lastMsg.id });
+    }
+  }, [selectedChatId, historyData, send]);
 
   // Merge history from the REST API with any WS messages that arrived before
   // the history finished loading (dedupe by id).
@@ -162,7 +174,7 @@ export function ChatPane({ selectedChatId, onToggleSidebar }: ChatPaneProps) {
         <div className="flex items-center gap-md">
           {onToggleSidebar && (
             <button
-              className="md:hidden p-2 hover:bg-surface-container-low rounded-full cursor-pointer"
+              className="p-2 hover:bg-surface-container-low rounded-full cursor-pointer"
               onClick={onToggleSidebar}
               aria-label="Toggle sidebar"
             >

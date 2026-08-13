@@ -75,6 +75,44 @@ func (r *ChatRepository) GetOrCreateDirectChat(userA, userB int64) (*domain.Chat
 	return &chat, nil
 }
 
+// CreateGroupChat creates a group chat with the given members (creator included).
+func (r *ChatRepository) CreateGroupChat(creatorID int64, name string, memberIDs []int64) (*domain.Chat, error) {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	now := time.Now()
+	var chat domain.Chat
+	err = tx.QueryRow(
+		`INSERT INTO chats (name, is_group, created_by, created_at) VALUES ($1, TRUE, $2, $3) RETURNING id`,
+		name, creatorID, now,
+	).Scan(&chat.ID)
+	if err != nil {
+		return nil, err
+	}
+	chat.Name = &name
+	chat.IsGroup = true
+	chat.CreatedBy = creatorID
+	chat.CreatedAt = now
+
+	members := append([]int64{creatorID}, memberIDs...)
+	for _, uid := range members {
+		if _, err = tx.Exec(
+			`INSERT INTO chat_members (chat_id, user_id, last_read_at, joined_at) VALUES ($1, $2, $3, $4)`,
+			chat.ID, uid, now, now,
+		); err != nil {
+			return nil, err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return &chat, nil
+}
+
 // IsMember checks whether a user belongs to a chat.
 func (r *ChatRepository) IsMember(chatID, userID int64) (bool, error) {
 	var exists bool
@@ -167,12 +205,18 @@ func (r *ChatRepository) GetChatSummary(chatID, userID int64) (*domain.ChatSumma
 	return r.enrichChatSummary(&s, userID)
 }
 
-// enrichChatSummary fills in other-user info (1:1) and the last message.
+// enrichChatSummary fills in other-user info (1:1), their read watermark,
+// and the last message.
 func (r *ChatRepository) enrichChatSummary(s *domain.ChatSummary, userID int64) (*domain.ChatSummary, error) {
 	if !s.IsGroup {
 		other, err := r.getOtherMember(s.ID, userID)
 		if err == nil {
 			s.OtherUser = other
+		}
+		// Read watermark of the OTHER member — used for the "Read" badge.
+		// (Own last_read_at always tracks own sends, useless for receipts.)
+		if t, err := r.getOtherLastReadAt(s.ID, userID); err == nil {
+			s.OtherLastReadAt = t
 		}
 	}
 
@@ -191,6 +235,20 @@ func (r *ChatRepository) MarkRead(chatID, userID int64) error {
 		chatID, userID,
 	)
 	return err
+}
+
+// getOtherLastReadAt returns the other member's last_read_at in a 1:1 chat.
+func (r *ChatRepository) getOtherLastReadAt(chatID, userID int64) (*time.Time, error) {
+	var t time.Time
+	err := r.db.QueryRow(
+		`SELECT cm.last_read_at FROM chat_members cm
+		 WHERE cm.chat_id = $1 AND cm.user_id != $2 LIMIT 1`,
+		chatID, userID,
+	).Scan(&t)
+	if err != nil {
+		return nil, err
+	}
+	return &t, nil
 }
 
 // getOtherMember returns the other participant in a 1:1 chat.

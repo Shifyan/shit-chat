@@ -270,7 +270,9 @@ func (h *Handler) handleRead(client *Client, msg *WSMessage) {
 	}
 	_ = h.chatService.MarkRead(*msg.ChatID, client.userID)
 
-	h.hub.BroadcastToRoom(*msg.ChatID, client.userID, &WSMessage{
+	// Broadcast to ALL members including the reader — their own sidebar needs
+	// the event to clear the unread badge immediately.
+	h.hub.BroadcastToRoom(*msg.ChatID, 0, &WSMessage{
 		Type:              "read",
 		ChatID:            msg.ChatID,
 		UserID:            &client.userID,

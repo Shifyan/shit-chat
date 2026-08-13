@@ -59,12 +59,25 @@ func (ctrl *ChatController) CreateChat(c *gin.Context) {
 		return
 	}
 
-	if req.UserID == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "user_id is required"})
-		return
+	var chat *domain.Chat
+	var err error
+
+	if req.Name != nil || len(req.MemberIDs) > 0 {
+		// Group chat
+		var name string
+		if req.Name != nil {
+			name = *req.Name
+		}
+		chat, err = ctrl.chatService.CreateGroupChat(userID, name, req.MemberIDs)
+	} else {
+		// Direct chat
+		if req.UserID == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "user_id is required"})
+			return
+		}
+		chat, err = ctrl.chatService.CreateDirectChat(userID, *req.UserID)
 	}
 
-	chat, err := ctrl.chatService.CreateDirectChat(userID, *req.UserID)
 	if err != nil {
 		status := http.StatusInternalServerError
 		switch err.Error() {
@@ -72,19 +85,28 @@ func (ctrl *ChatController) CreateChat(c *gin.Context) {
 			status = http.StatusBadRequest
 		case "user not found":
 			status = http.StatusNotFound
+		case "group name is required", "group needs at least one other member":
+			status = http.StatusBadRequest
 		}
 		c.JSON(status, gin.H{"message": err.Error()})
 		return
 	}
 
-	// Notify the target user in real time so the new chat appears in their
+	// Notify all other members in real time so the new chat appears in their
 	// conversation list without waiting for polling.
-	if ctrl.events != nil && *req.UserID != userID {
-		if summary, err := ctrl.chatService.GetChatSummary(chat.ID, *req.UserID); err == nil {
-			ctrl.events.SendToUser(*req.UserID, gin.H{
-				"type": "chat_created",
-				"chat": summary,
-			})
+	if ctrl.events != nil {
+		if memberIDs, err := ctrl.chatService.GetMembers(chat.ID); err == nil {
+			for _, mid := range memberIDs {
+				if mid == userID {
+					continue
+				}
+				if summary, err := ctrl.chatService.GetChatSummary(chat.ID, mid); err == nil {
+					ctrl.events.SendToUser(mid, gin.H{
+						"type": "chat_created",
+						"chat": summary,
+					})
+				}
+			}
 		}
 	}
 
