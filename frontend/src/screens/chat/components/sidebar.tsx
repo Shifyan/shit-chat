@@ -13,6 +13,7 @@ import { useMe, useChats, type ChatSummary } from "@/service/chat.service";
 import { useChatSocket } from "@/lib/ws";
 import { useLogout } from "@/service/auth.service";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useSWRConfig } from "swr";
 import { ChatListItem } from "./chat-list-item";
 import { useEffect, useState } from "react";
@@ -108,10 +109,13 @@ export function Sidebar({ selectedChatId, onSelectChat, onMobileClose }: Sidebar
             <AddressBook className="size-5" />
             <span className="text-label-md font-medium leading-label-md">Contacts</span>
           </a>
-          <a className="text-secondary pl-4 py-2 flex items-center gap-sm hover:bg-surface-container-low transition-colors duration-200 cursor-pointer">
+          <Link
+            href="/settings"
+            className="text-secondary pl-4 py-2 flex items-center gap-sm hover:bg-surface-container-low transition-colors duration-200 cursor-pointer"
+          >
             <Gear className="size-5" />
             <span className="text-label-md font-medium leading-label-md">Settings</span>
-          </a>
+          </Link>
         </div>
 
         {/* Chat list */}

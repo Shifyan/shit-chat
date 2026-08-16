@@ -92,6 +92,24 @@ export function useChatMessages(chatId: number | null, beforeId?: number | null)
   return useFetch<MessagesResponse>(key);
 }
 
+/** Update own profile (fullname and/or email). */
+export type UpdateProfileBody = {
+  fullname?: string;
+  email?: string;
+};
+
+export function useUpdateProfile() {
+  return useMutation<UserProfile, UpdateProfileBody>("/me");
+}
+
+/** Change password (verifies current password first). */
+export function useChangePassword() {
+  return useMutation<
+    { message: string },
+    { current_password: string; new_password: string }
+  >("/me/password");
+}
+
 /** Mark a chat as read (HTTP fallback). */
 export function useMarkRead(chatId: number) {
   return useMutation<{ message: string }, { last_read_message_id: number }>(

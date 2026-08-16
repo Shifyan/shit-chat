@@ -35,6 +35,8 @@ func MapRoutes(
 	api.Use(chatLimiter)
 	{
 		api.GET("/me", userCtrl.Me)
+		api.PATCH("/me", userCtrl.UpdateMe)
+		api.PUT("/me/password", userCtrl.ChangePassword)
 		api.GET("/users", userCtrl.SearchUsers)
 		api.GET("/chats", chatCtrl.ListChats)
 		api.POST("/chats", chatCtrl.CreateChat)

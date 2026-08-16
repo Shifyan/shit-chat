@@ -1,8 +1,16 @@
 "use client";
 
-import { MagnifyingGlass, DotsThreeVertical, List } from "@phosphor-icons/react";
+import {
+  MagnifyingGlass,
+  DotsThreeVertical,
+  List,
+} from "@phosphor-icons/react";
 import { useChatSocket } from "@/lib/ws";
-import { useChats, useChatMessages, type ChatSummary } from "@/service/chat.service";
+import {
+  useChats,
+  useChatMessages,
+  type ChatSummary,
+} from "@/service/chat.service";
 import { MessageList } from "./message-list";
 import { MessageComposer } from "./message-composer";
 import { EmptyState } from "./empty-state";
@@ -20,15 +28,19 @@ export function ChatPane({ selectedChatId, onToggleSidebar }: ChatPaneProps) {
   const { data: historyData } = useChatMessages(selectedChatId);
   const { status, subscribe, send } = useChatSocket();
   const [messages, setMessages] = useState<MessageData[]>([]);
-  const [pendingMessages, setPendingMessages] = useState<Map<string, { tempId: string; body: string }>>(new Map());
+  const [pendingMessages, setPendingMessages] = useState<
+    Map<string, { tempId: string; body: string }>
+  >(new Map());
   const [typingUser, setTypingUser] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastReadIdRef = useRef<number | null>(null);
 
-  const chat: ChatSummary | undefined = chatsData?.chats?.find((c) => c.id === selectedChatId);
+  const chat: ChatSummary | undefined = chatsData?.chats?.find(
+    (c) => c.id === selectedChatId,
+  );
   const displayName = chat?.is_group
-    ? chat?.name ?? "Group"
-    : chat?.other_user?.fullname ?? "Unknown";
+    ? (chat?.name ?? "Group")
+    : (chat?.other_user?.fullname ?? "Unknown");
 
   // Keep the peer's name in a ref so the typing handler (registered once per
   // chat) always sees the freshest value.
@@ -56,7 +68,11 @@ export function ChatPane({ selectedChatId, onToggleSidebar }: ChatPaneProps) {
     const lastMsg = historyData.messages[historyData.messages.length - 1];
     if (lastReadIdRef.current !== lastMsg.id) {
       lastReadIdRef.current = lastMsg.id;
-      send({ type: "read", chat_id: selectedChatId, last_read_message_id: lastMsg.id });
+      send({
+        type: "read",
+        chat_id: selectedChatId,
+        last_read_message_id: lastMsg.id,
+      });
     }
   }, [selectedChatId, historyData, send]);
 
@@ -87,7 +103,11 @@ export function ChatPane({ selectedChatId, onToggleSidebar }: ChatPaneProps) {
             return [...prev, m];
           });
           // Mark read
-          send({ type: "read", chat_id: m.chat_id, last_read_message_id: m.id });
+          send({
+            type: "read",
+            chat_id: m.chat_id,
+            last_read_message_id: m.id,
+          });
         }
       }),
     );
@@ -111,7 +131,11 @@ export function ChatPane({ selectedChatId, onToggleSidebar }: ChatPaneProps) {
 
     unsubs.push(
       subscribe("typing", (msg) => {
-        const t = msg as { chat_id?: number; user_id?: number; is_typing?: boolean };
+        const t = msg as {
+          chat_id?: number;
+          user_id?: number;
+          is_typing?: boolean;
+        };
         if (t.chat_id === selectedChatId && t.user_id !== undefined) {
           if (t.is_typing) {
             setTypingUser(peerNameRef.current ?? "Someone");
@@ -198,10 +222,7 @@ export function ChatPane({ selectedChatId, onToggleSidebar }: ChatPaneProps) {
                 {typingUser} is typing…
               </p>
             ) : (
-              <p className="text-label-sm text-secondary flex items-center gap-1 leading-label-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
-                Active now
-              </p>
+              <div></div>
             )}
           </div>
         </div>
@@ -219,10 +240,16 @@ export function ChatPane({ selectedChatId, onToggleSidebar }: ChatPaneProps) {
         </nav>
 
         <div className="flex items-center gap-md">
-          <button className="p-2 hover:bg-surface-container-low rounded-full transition-colors cursor-pointer" aria-label="Search">
+          <button
+            className="p-2 hover:bg-surface-container-low rounded-full transition-colors cursor-pointer"
+            aria-label="Search"
+          >
             <MagnifyingGlass className="size-5 text-secondary" />
           </button>
-          <button className="p-2 hover:bg-surface-container-low rounded-full transition-colors cursor-pointer" aria-label="More options">
+          <button
+            className="p-2 hover:bg-surface-container-low rounded-full transition-colors cursor-pointer"
+            aria-label="More options"
+          >
             <DotsThreeVertical className="size-5 text-secondary" />
           </button>
         </div>

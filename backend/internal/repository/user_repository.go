@@ -53,6 +53,28 @@ func (r *UserRepository) GetUserByID(id int64) (*User, error) {
 	return &user, nil
 }
 
+// UpdateProfile updates a user's fullname and email.
+func (r *UserRepository) UpdateProfile(id int64, fullname, email string) error {
+	_, err := r.db.Exec(
+		`UPDATE users SET fullname = $2, email = $3 WHERE id = $1`,
+		id, fullname, email,
+	)
+	return err
+}
+
+// GetUserPassword returns the bcrypt hash for a user (password change verification).
+func (r *UserRepository) GetUserPassword(id int64) (string, error) {
+	var hash string
+	err := r.db.QueryRow(`SELECT password FROM users WHERE id = $1`, id).Scan(&hash)
+	return hash, err
+}
+
+// UpdatePassword sets a new bcrypt hash.
+func (r *UserRepository) UpdatePassword(id int64, hashed string) error {
+	_, err := r.db.Exec(`UPDATE users SET password = $2 WHERE id = $1`, id, hashed)
+	return err
+}
+
 // UserBrief is a lighter projection for search results.
 type UserBrief struct {
 	ID       int64  `json:"id"`
