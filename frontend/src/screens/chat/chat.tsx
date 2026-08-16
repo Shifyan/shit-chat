@@ -20,21 +20,8 @@ export default function ChatScreen() {
     }
   }, [meError, meLoading, router]);
 
-  // Load last selected chat from localStorage
-  useEffect(() => {
-    if (me) {
-      const saved = localStorage.getItem(`selectedChat_${me.id}`);
-      if (saved) {
-        setSelectedChatId(parseInt(saved, 10));
-      }
-    }
-  }, [me]);
-
   const handleSelectChat = (id: number) => {
     setSelectedChatId(id);
-    if (me) {
-      localStorage.setItem(`selectedChat_${me.id}`, String(id));
-    }
   };
 
   if (meLoading) {

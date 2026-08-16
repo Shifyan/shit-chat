@@ -161,7 +161,7 @@ export function ChatPane({ selectedChatId, onToggleSidebar }: ChatPaneProps) {
   );
 
   if (!selectedChatId) {
-    return <EmptyState type="no-selection" />;
+    return <EmptyState type="no-selection" onToggleSidebar={onToggleSidebar} />;
   }
 
   return (

@@ -1,14 +1,24 @@
 "use client";
 
-import { Chat } from "@phosphor-icons/react";
+import { Chat, List } from "@phosphor-icons/react";
 
 interface EmptyStateProps {
   type: "no-selection" | "no-chats";
+  onToggleSidebar?: () => void;
 }
 
-export function EmptyState({ type }: EmptyStateProps) {
+export function EmptyState({ type, onToggleSidebar }: EmptyStateProps) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-xl text-center">
+    <div className="flex-1 flex flex-col items-center justify-center p-xl text-center relative">
+      {onToggleSidebar && (
+        <button
+          className="absolute top-4 left-4 p-2 hover:bg-surface-container-low rounded-full cursor-pointer"
+          onClick={onToggleSidebar}
+          aria-label="Toggle sidebar"
+        >
+          <List className="size-5 text-secondary" />
+        </button>
+      )}
       <div className="inline-flex items-center justify-center w-12 h-12 bg-primary rounded-default ">
         <Chat weight="fill" className="text-on-primary size-6" />
       </div>

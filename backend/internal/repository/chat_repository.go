@@ -158,7 +158,11 @@ func (r *ChatRepository) ListChatsForUser(userID int64) ([]domain.ChatSummary, e
 			) AS unread_count
 		FROM chats c
 		JOIN chat_members cm ON cm.chat_id = c.id AND cm.user_id = $1
-		ORDER BY c.created_at DESC`
+		-- Order by last activity: most recent message, fallback to creation
+		ORDER BY COALESCE(
+			(SELECT MAX(m2.created_at) FROM messages m2 WHERE m2.chat_id = c.id),
+			c.created_at
+		) DESC`
 
 	rows, err := r.db.Query(query, userID)
 	if err != nil {
